@@ -1,10 +1,13 @@
 package com.gymduo.model.viewmodels;
 
+import java.util.List;
+
 public class ExerciseViewModel {
 	public String name;
 	public String description;
 	public String photoURL;
 	public String videoURL;
+	public List<ExerciseRecordViewModel> exerciseRecords;
 	
 	public ExerciseViewModel() {
 		// TODO Auto-generated constructor stub

@@ -92,6 +92,7 @@ public class ProgramController {
 														model.videoURL = exercise.getVideoURL();
 														model.reps = temp.getReps();
 														model.sets = temp.getSets();
+														model.exerciseId = exercise.getId();
 														return model;
 													}).collect(Collectors.toList());
 														

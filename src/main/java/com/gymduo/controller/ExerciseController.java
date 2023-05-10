@@ -1,6 +1,9 @@
 package com.gymduo.controller;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gymduo.model.Exercise;
@@ -17,7 +21,9 @@ import com.gymduo.model.requestmodels.CreateExerciseRecordRequestModel;
 import com.gymduo.model.requestmodels.CreateExerciseRequestModel;
 import com.gymduo.model.requestmodels.DeleteExerciseRequestModel;
 import com.gymduo.model.requestmodels.UpdateExerciseRequestModel;
+import com.gymduo.model.viewmodels.ExerciseRecordViewModel;
 import com.gymduo.model.viewmodels.ExerciseViewModel;
+
 import com.gymduo.payload.Data;
 import com.gymduo.payload.Message;
 import com.gymduo.repo.ExerciseRecordRepo;
@@ -65,7 +71,7 @@ public class ExerciseController {
 	{
 		boolean isExerciseFound = exerciseRepo.findByName(model.name).isEmpty();
 		
-		if (isExerciseFound)
+		if (!isExerciseFound)
 		{
 			Exercise exerciseFound = exerciseRepo.findByName(model.name).get(0);
 
@@ -81,13 +87,15 @@ public class ExerciseController {
 				
 			if (model.photoURL != null)
 			{
-				exerciseFound.setDescription(model.photoURL);
+				exerciseFound.setPhotoURL(model.photoURL);
 			}
 			
 			if (model.videoURL != null)
 			{
-				exerciseFound.setDescription(model.videoURL);
+				exerciseFound.setVideoURL(model.videoURL);
 			}
+			
+			exerciseRepo.save(exerciseFound);
 			Message msg = new Message("The exercise is succesfully updated!", 200);
 			return msg;
 				
@@ -105,7 +113,7 @@ public class ExerciseController {
 	{
 		
 		boolean isExerciseFound = exerciseRepo.findByName(model.name).isEmpty();
-		if (!isExerciseFound)
+		if (isExerciseFound)
 		{
 			Message msg = new Message("Exercise could not found!", 404);
 			return msg;
@@ -120,7 +128,7 @@ public class ExerciseController {
 	}
 
 	@GetMapping("/GetExercise/{id}")
-	public Data<ExerciseViewModel> getExerciseDetail(@PathVariable("id") String id)
+	public Data<ExerciseViewModel> getExerciseDetail(@PathVariable("id") String id, @RequestParam String userAppKey)
 	{
 		Optional<Exercise> exerciseFound = exerciseRepo.findById(id);
 		
@@ -130,13 +138,36 @@ public class ExerciseController {
 			return response;
 		}
 		
+		User userFound = userRepo.findByAppKey(userAppKey);
+		if (userFound == null)
+		{
+			Data<ExerciseViewModel> response = new Data<ExerciseViewModel>("User could not found!", 404, null);
+			return response;
+		}
+		
 		Exercise exercise = exerciseFound.get();
+		
+		List<ExerciseRecordViewModel> exerciseRecords = exerciseRecordRepo.findByExerciseAndUser(exercise, userFound).stream()
+				.map(er -> {
+					String pattern = "d MMM, yy";
+					DateTimeFormatter simpleDateFormat = DateTimeFormatter.ofPattern(pattern);
+					
+					ExerciseRecordViewModel model = new ExerciseRecordViewModel();
+					model.exerciseId = exercise.getId();
+					model.weight = er.getWeight();
+					model.maxRep = er.getMaxRep();
+					model.currentWeight = er.getCurrentWeight();
+					model.date = simpleDateFormat.format(er.getDateCreated());
+					
+					return model;
+				}).collect(Collectors.toList());
 		
 		ExerciseViewModel responseData = new ExerciseViewModel();
 		responseData.name = exercise.getName();
 		responseData.description = exercise.getDescription();
 		responseData.photoURL = exercise.getPhotoURL();
 		responseData.videoURL = exercise.getVideoURL();
+		responseData.exerciseRecords = exerciseRecords;
 		
 		Data<ExerciseViewModel> response = new Data<ExerciseViewModel>("Exercise information succesfully obtained", 200, responseData);
 		return response;

@@ -5,6 +5,7 @@ public class ProgramExerciseViewModel {
 	public String description;
 	public String photoURL;
 	public String videoURL;
+	public String exerciseId;
 	public int reps;
 	public int sets;
 	
@@ -13,7 +14,7 @@ public class ProgramExerciseViewModel {
 	}
 
 	public ProgramExerciseViewModel(String name, String description, String photoURL, String videoURL, int reps,
-			int sets) {
+			int sets, String exerciseId) {
 		super();
 		this.name = name;
 		this.description = description;
@@ -21,6 +22,7 @@ public class ProgramExerciseViewModel {
 		this.videoURL = videoURL;
 		this.reps = reps;
 		this.sets = sets;
+		this.exerciseId = exerciseId;
 	}
 	
 	

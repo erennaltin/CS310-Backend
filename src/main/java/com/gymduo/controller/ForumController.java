@@ -44,7 +44,7 @@ public class ForumController {
 			return response;
 		}
 		
-		Topic newlyTopic = new Topic(model.title);
+		Topic newlyTopic = new Topic(model.title, model.description);
 		Topic insertedTopic = topicRepo.insert(newlyTopic);
 		if (insertedTopic == null)
 		{
@@ -139,7 +139,7 @@ public class ForumController {
 		List<Topic> topics = topicRepo.findAll();
 		
 		List<TopicViewModel> topicReponseData = topics.stream().map(topic -> 
-								new TopicViewModel(topic.getTitle(), null)).collect(Collectors.toList());
+								new TopicViewModel(topic.getTitle(), null, null)).collect(Collectors.toList());
 		
 		Data<List<TopicViewModel>> response = 
 				new Data<List<TopicViewModel>>("Topic information succesfully obtained", 200, topicReponseData);
@@ -167,7 +167,7 @@ public class ForumController {
 			return commentModel;
 		}).collect(Collectors.toList());
 		
-		TopicViewModel topicData = new TopicViewModel(topicTitle, commentsParsed);
+		TopicViewModel topicData = new TopicViewModel(topicTitle, commentsParsed, topicFound.getDescription());
 		
 		Data<TopicViewModel> response = new Data<TopicViewModel>("Topic information succesfully obtained", 200, topicData);
 		return response;

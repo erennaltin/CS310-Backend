@@ -9,15 +9,30 @@ public class Topic extends BaseModel {
 	private String id;
 	
 	private String title;
+	private String description;
 	
 	public Topic() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Topic(String title) {
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+	public Topic(String title, String description) {
 		super();
 		this.title = title;
+		this.description = description;
 	}
+
+
 
 	public String getTitle() {
 		return title;
